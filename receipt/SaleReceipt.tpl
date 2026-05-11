@@ -700,6 +700,12 @@ table.payments td.label {
 		.line_serial {
 			display: none;
 		}
+		.notesTitle {
+			display: none;
+		}
+		.notesTable {
+			display: none;
+		}
 	}
 
 /* Improved Special Order Layout */
@@ -1199,11 +1205,11 @@ table.payments td.label {
 			{% endif %}
 			{% if options.per_line_discount == true and not parameters.gift_receipt %}
 				{% if Line.calcLineDiscount > 0 %}
-					<div class="line_discount line_extra">Discount: '{{ Line.Discount.name }}' -{{Line.calcLineDiscount|money}}</div>
+					<div class="line_discount line_extra">Discount: '{{ Line.Discount.name }}' -{{ Line.calcLineDiscount|money }}</div>
 				{% elseif Line.calcLineDiscount < 0 %}
-					<div class="line_discount line_extra">Discount: '{{ Line.Discount.name }}' {{Line.calcLineDiscount|getinverse|money}}</div>
+					<div class="line_discount line_extra">Discount: '{{ Line.Discount.name }}' {{ Line.calcLineDiscount|getinverse|money }}</div>
 				{% elseif has_discount %}
-					<div class="line_discount line_extra">Manual Discount: -{{discount_amount|money}}</div>
+					<div class="line_discount line_extra">Manual Discount: -{{ multiply(discount_amount, Line.unitQuantity)|money }}</div>
 				{% endif %}
 			{% endif %}
 		</td>
@@ -1999,7 +2005,7 @@ table.payments td.label {
 	{% for SaleNote in SaleNotes %}
 		{% if SaleNote.PrintedNote and SaleNote.PrintedNote.note != '' %}
 			<h2 class="notesTitle">NOTES</h2>
-			<table>
+			<table class="notesTable">
 				<tr>
 					<td>
 						{{SaleNote.PrintedNote.note}}
