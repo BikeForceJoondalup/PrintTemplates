@@ -813,7 +813,9 @@ table.payments td.label {
 {% endblock content %}
 
 {% macro ui(options,parameters) %}
-	{% if not parameters.email %}
+	{# Ikeono doesn't provide parameters telling this it's a text receipt but it also doesn't provide page_width so we can use that to determine it's a text receipt #}
+	{% set sms_receipt = parameters.page_width is empty %}
+	{% if not parameters.email and not sms_receipt %}
 		<div class="print-hide ui-container">
 			<button id="print-button">
 				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -1056,6 +1058,8 @@ table.payments td.label {
 {% endmacro %}
 
 {% macro sale_details(Sale,options,parameters) %}
+	{# Ikeono doesn't provide parameters telling this it's a text receipt but it also doesn't provide page_width so we can use that to determine it's a text receipt #}
+	{% set sms_receipt = parameters.page_width is empty %}
 	<p id="receiptInfo" class="details">
 		{% if options.hide_quote_id_on_sale and Sale.completed == 'true' %}
 		{% else %}
@@ -1147,7 +1151,7 @@ table.payments td.label {
 						{% endif %}
 						<span class="receiptPhoneNumber" data-automation="receiptPhoneNumber">{{Phone.useType}}: 
 							{# For some reason, if the phone is in a span, it auto censors when emailed #}
-							{% if not parameters.email %}
+							{% if not parameters.email and not sms_receipt %}
 								<span class="receiptPhoneNumber__full">{{phone_number}}</span>
 								<span class="receiptPhoneNumber__censored">{{ censored_phone }}</span>
 							{% else %}
@@ -1171,7 +1175,7 @@ table.payments td.label {
 						<span class="receiptEmailLabel">Email: </span>
 						<span id="receiptEmail">
 							{# For some reason, if the email is in a span, it auto censors when emailed #}
-							{% if not parameters.email %}
+							{% if not parameters.email and not sms_receipt %}
 								<span class="receiptEmail__full">{{ email_address }}</span>
 								<span class="receiptEmail__censored">{{ censored_email }}</span>
 							{% else %}
