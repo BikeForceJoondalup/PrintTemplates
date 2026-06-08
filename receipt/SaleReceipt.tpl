@@ -549,6 +549,10 @@ table.payments td.label {
 		.receiptEmailLabel {
 			display: none !important;
 		}
+		.receiptPhoneNumber,
+		.receiptEmail {
+			white-space: nowrap;
+		}
 
 		.receiptCompanyNameField,
 		.receiptCustomerNameField,
@@ -722,6 +726,9 @@ table.payments td.label {
 {% endblock extrastyles %}
 
 {% block content %}
+	{# {% for key,value in parameters %}
+		{{ key }}: {{ value }}
+	{% endfor %} #}
 	{% set page_loaded = false %}
 	{{ _self.ui(_context,parameters) }}
 	{% for Sale in Sales %}
@@ -748,7 +755,7 @@ table.payments td.label {
 				{{ _self.header(Sale,_context) }}
 				{{ _self.title(Sale,parameters,_context) }}
 				{{ _self.date(Sale) }}
-				{{ _self.sale_details(Sale,_context) }}
+				{{ _self.sale_details(Sale,_context,parameters) }}
 				{% if not parameters.gift_receipt or show_sale_lines_on_gift_receipt %}
 					{{ _self.receipt(Sale,parameters,false,_context) }}
 				{% endif %}
@@ -914,7 +921,7 @@ table.payments td.label {
 		{{ _self.title(Sale,parameters,options) }}
 			<p class="copy">Store Copy</p>
 		{{ _self.date(Sale) }}
-		{{ _self.sale_details(Sale,options) }}
+		{{ _self.sale_details(Sale,options,parameters) }}
 
 		{% if options.show_sale_lines_on_store_copy %}
 			{{ _self.receipt(Sale,parameters,true,options) }}
@@ -1048,7 +1055,7 @@ table.payments td.label {
 	</p>
 {% endmacro %}
 
-{% macro sale_details(Sale,options) %}
+{% macro sale_details(Sale,options,parameters) %}
 	<p id="receiptInfo" class="details">
 		{% if options.hide_quote_id_on_sale and Sale.completed == 'true' %}
 		{% else %}
@@ -1138,7 +1145,16 @@ table.payments td.label {
 						{% else %}
 							{% set censored_phone = phone_number %}
 						{% endif %}
-						<span data-automation="receiptPhoneNumber">{{Phone.useType}}: <span class="receiptPhoneNumber__full">{{phone_number}}</span><span class="receiptPhoneNumber__censored">{{ censored_phone }}</span></span><br />
+						<span class="receiptPhoneNumber" data-automation="receiptPhoneNumber">{{Phone.useType}}: 
+							{# For some reason, if the phone is in a span, it auto censors when emailed #}
+							{% if not parameters.email %}
+								<span class="receiptPhoneNumber__full">{{phone_number}}</span>
+								<span class="receiptPhoneNumber__censored">{{ censored_phone }}</span>
+							{% else %}
+								{{ phone_number }}
+							{% endif %}
+						</span>
+						<br />
 					{% endfor %}
 
 					{% for Email in Sale.Customer.Contact.Emails.ContactEmail %}
@@ -1152,7 +1168,18 @@ table.payments td.label {
 						{% else %}
 							{% set censored_email = email_address %}
 						{% endif %}
-						<span class="receiptEmailLabel">Email: </span><span id="receiptEmail"><span class="receiptEmail__full">{{email_address}}</span><span class="receiptEmail__censored">{{ censored_email }}</span> ({{Email.useType}})</span><br />
+						<span class="receiptEmailLabel">Email: </span>
+						<span id="receiptEmail">
+							{# For some reason, if the email is in a span, it auto censors when emailed #}
+							{% if not parameters.email %}
+								<span class="receiptEmail__full">{{ email_address }}</span>
+								<span class="receiptEmail__censored">{{ censored_email }}</span>
+							{% else %}
+								{{ Email.address }}
+							{% endif %}
+							({{Email.useType}})
+						</span>
+						<br />
 					{% endfor %}
 				</span>
 			{% endif %}
